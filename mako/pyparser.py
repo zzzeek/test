@@ -77,7 +77,18 @@ if _ast:
             for n in node.targets:
                 self.visit(n)
             self.in_assign_targets = in_a
-            
+        
+        if util.py3k:
+            # ExceptHandler is in Python 2, but this
+            # block only works in Python 3 (and is required there)
+            def visit_ExceptHandler(self, node):
+                if node.name is not None:
+                    self._add_declared(node.name)
+                if node.type is not None:
+                    self.listener.undeclared_identifiers.add(node.type.id)
+                for statement in node.body:
+                    self.visit(statement)
+                
         def visit_FunctionDef(self, node):
             self._add_declared(node.name)
             # push function state onto stack.  dont log any
@@ -111,7 +122,9 @@ if _ast:
         def visit_Name(self, node):
             if isinstance(node.ctx, _ast.Store):
                 self._add_declared(node.id)
-            if node.id not in reserved and node.id not in self.listener.declared_identifiers and node.id not in self.local_ident_stack:
+            if node.id not in reserved and \
+                        node.id not in self.listener.declared_identifiers and \
+                        node.id not in self.local_ident_stack:
                 self.listener.undeclared_identifiers.add(node.id)
         def visit_Import(self, node):
             for name in node.names:
