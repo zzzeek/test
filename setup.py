@@ -1,6 +1,19 @@
 from setuptools import setup, find_packages
 import os
 import re
+import sys
+
+extra = {}
+if sys.version_info >= (3, 0):
+    # monkeypatch our preprocessor
+    # onto the 2to3 tool.  
+    from sa2to3 import refactor_string
+    from lib2to3.refactor import RefactoringTool
+    RefactoringTool.refactor_string = refactor_string
+
+    extra.update(
+        use_2to3=True,
+    )
 
 v = file(os.path.join(os.path.dirname(__file__), 'mako', '__init__.py'))
 VERSION = re.compile(r".*__version__ = '(.*?)'", re.S).match(v.read()).group(1)

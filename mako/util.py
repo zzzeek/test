@@ -6,16 +6,20 @@
 
 import sys
 
-try:
-    from cStringIO import StringIO
-except:
-    from StringIO import StringIO
 
 py3k = getattr(sys, 'py3kwarning', False) or sys.version_info >= (3, 0)
 jython = sys.platform.startswith('java')
 win32 = sys.platform.startswith('win')
 
-import codecs, re, weakref, os, time
+if py3k:
+    from io import StringIO
+else:
+    try:
+        from cStringIO import StringIO
+    except:
+        from StringIO import StringIO
+
+import codecs, re, weakref, os, time, operator
 
 try:
     import threading
@@ -138,8 +142,8 @@ class LRUCache(dict):
     
     def _manage_size(self):
         while len(self) > self.capacity + self.capacity * self.threshold:
-            bytime = dict.values(self)
-            bytime.sort(lambda a, b: cmp(b.timestamp, a.timestamp))
+            bytime = sorted(dict.values(self), 
+                            key=operator.attrgetter('timestamp'), reverse=True)
             for item in bytime[self.capacity:]:
                 try:
                     del self[item.key]

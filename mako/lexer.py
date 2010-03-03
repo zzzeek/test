@@ -7,7 +7,7 @@
 """provides the Lexer class for parsing template strings into parse trees."""
 
 import re, codecs
-from mako import parsetree, exceptions
+from mako import parsetree, exceptions, util
 from mako.pygen import adjust_whitespace
 
 _regexp_cache = {}
@@ -27,6 +27,12 @@ class Lexer(object):
         self.control_line = []
         self.disable_unicode = disable_unicode
         self.encoding = input_encoding
+        
+        if util.py3k and disable_unicode:
+            raise exceptions.UnsupportedError(
+                                    "Mako for Python 3 does not "
+                                    "support disabling Unicode")
+        
         if preprocessor is None:
             self.preprocessor = []
         elif not hasattr(preprocessor, '__iter__'):
