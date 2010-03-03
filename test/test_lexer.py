@@ -243,8 +243,33 @@ class LexerTest(TemplateTest):
             TemplateNode({}, [Text(u'\n        \n        ', (1, 1)), NamespaceTag(u'namespace', {u'name': u'ns'}, (3, 9), [Text(u'\n            ', (3, 31)), DefTag(u'def', {u'name': u'lala(hi, there)'}, (4, 13), [Text(u'\n                ', (4, 42)), CallTag(u'call', {u'expr': u'something()'}, (5, 17), []), Text(u'\n            ', (5, 44))]), Text(u'\n        ', (6, 20))]), Text(u'\n        \n        ', (7, 22))])
         )
     
-    def test_code(self):
-        template = """
+    if util.py3k:
+        def test_code(self):
+            template = \
+                    """
+        some text
+        
+        <%
+            print("hi")
+            for x in range(1,5):
+                print(x)
+        %>
+        
+        more text
+        
+        <%!
+            import foo
+        %>
+        """
+            nodes = Lexer(template).parse()
+            self._compare(
+                nodes,
+                TemplateNode({}, [Text(u'\n        some text\n        \n        ', (1, 1)), Code(u'\nprint("hi")\nfor x in range(1,5):\n    print(x)\n        \n', False, (4, 9)), Text(u'\n        \n        more text\n        \n        ', (8, 11)), Code(u'\nimport foo\n        \n', True, (12, 9)), Text(u'\n        ', (14, 11))])
+            )
+    else:
+        def test_code(self):
+            template = \
+                    """
         some text
         
         <%
@@ -259,11 +284,11 @@ class LexerTest(TemplateTest):
             import foo
         %>
         """
-        nodes = Lexer(template).parse()
-        self._compare(
-            nodes,
-            TemplateNode({}, [Text(u'\n        some text\n        \n        ', (1, 1)), Code(u'\nprint "hi"\nfor x in range(1,5):\n    print x\n        \n', False, (4, 9)), Text(u'\n        \n        more text\n        \n        ', (8, 11)), Code(u'\nimport foo\n        \n', True, (12, 9)), Text(u'\n        ', (14, 11))])
-        )
+            nodes = Lexer(template).parse()
+            self._compare(
+                nodes,
+                TemplateNode({}, [Text(u'\n        some text\n        \n        ', (1, 1)), Code(u'\nprint "hi"\nfor x in range(1,5):\n    print x\n        \n', False, (4, 9)), Text(u'\n        \n        more text\n        \n        ', (8, 11)), Code(u'\nimport foo\n        \n', True, (12, 9)), Text(u'\n        ', (14, 11))])
+            )
     
     def test_code_and_tags(self):
         template = """
@@ -520,7 +545,8 @@ text text la la
         )
 
     def test_crlf(self):
-        template = file(self._file_path("crlf.html")).read()
+        # hmmmm...py3k does something different with cr/lf ?
+        template = open(self._file_path("crlf.html")).read()
         nodes = Lexer(template).parse()
         self._compare(
             nodes,
