@@ -5,9 +5,14 @@
 # the MIT License: http://www.opensource.org/licenses/mit-license.php
 
 
-import re, cgi, urllib, htmlentitydefs, codecs
+import re, cgi, urllib, codecs
 from StringIO import StringIO
 from mako import util
+
+if util.py3k:
+    from html import entities as htmlentitydefs
+else:
+    import htmlentitydefs
 
 xml_escapes = {
     '&' : '&amp;',
