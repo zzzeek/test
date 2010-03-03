@@ -297,7 +297,7 @@ class Tag(Node):
                                         self.keyword, 
                                         util.sorted_dict_repr(self.attributes),
                                         (self.lineno, self.pos), 
-                                        [repr(x) for x in self.nodes]
+                                        self.nodes
                                     )
         
 class IncludeTag(Tag):
