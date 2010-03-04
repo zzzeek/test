@@ -114,18 +114,18 @@ class Template(object):
                             os.stat(path)[stat.ST_MTIME] < filemtime:
                     _compile_module_file(
                                 self, 
-                                open(filename).read(), 
+                                open(filename, 'rb').read(), 
                                 filename, 
                                 path)
-                module = imp.load_source(self.module_id, path, open(path))
+                module = imp.load_source(self.module_id, path, open(path, 'rb'))
                 del sys.modules[self.module_id]
                 if module._magic_number != codegen.MAGIC_NUMBER:
                     _compile_module_file(
                                 self, 
-                                open(filename).read(), 
+                                open(filename, 'rb').read(), 
                                 filename, 
                                 path)
-                    module = imp.load_source(self.module_id, path, open(path))
+                    module = imp.load_source(self.module_id, path, open(path, 'rb'))
                     del sys.modules[self.module_id]
                 ModuleInfo(module, path, self, filename, None, None)
             else:
@@ -133,7 +133,7 @@ class Template(object):
                 # in memory
                 (code, module) = _compile_text(
                                     self, 
-                                    open(filename).read(), 
+                                    open(filename, 'rb').read(), 
                                     filename)
                 self._source = None
                 self._code = code
@@ -337,7 +337,7 @@ class ModuleInfo(object):
                 return self.template_source
         else:
             if self.module._source_encoding:
-                return open(self.template_filename).read().\
+                return open(self.template_filename, 'rb').read().\
                                 decode(self.module._source_encoding)
             else:
                 return open(self.template_filename).read()

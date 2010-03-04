@@ -135,17 +135,19 @@ class RichTraceback(object):
                     template_filename = info.template_filename or filename
                 except KeyError:
                     # A normal .py file (not a Template)
-                    try:
-                        fp = open(filename)
-                        encoding = util.parse_encoding(fp)
-                        fp.close()
-                    except IOError:
-                        encoding = None
-                    if encoding:
-                        line = line.decode(encoding)
-                    else:
-                        line = line.decode('ascii', 'replace')
-                    new_trcback.append((filename, lineno, function, line, None, None, None, None))
+                    if not util.py3k:
+                        try:
+                            fp = open(filename, 'rb')
+                            encoding = util.parse_encoding(fp)
+                            fp.close()
+                        except IOError:
+                            encoding = None
+                        if encoding:
+                            line = line.decode(encoding)
+                        else:
+                            line = line.decode('ascii', 'replace')
+                    new_trcback.append((filename, lineno, function, line, 
+                                            None, None, None, None))
                     continue
 
                 template_ln = module_ln = 1
@@ -166,7 +168,9 @@ class RichTraceback(object):
                 template_line = template_lines[template_ln - 1]
             else:
                 template_line = None
-            new_trcback.append((filename, lineno, function, line, template_filename, template_ln, template_line, template_source))
+            new_trcback.append((filename, lineno, function, 
+                                line, template_filename, template_ln, 
+                                template_line, template_source))
         if not self.source:
             for l in range(len(new_trcback)-1, 0, -1):
                 if new_trcback[l][5]:
@@ -176,7 +180,7 @@ class RichTraceback(object):
             else:
                 try:
                     # A normal .py file (not a Template)
-                    fp = open(new_trcback[-1][0])
+                    fp = open(new_trcback[-1][0], 'rb')
                     encoding = util.parse_encoding(fp)
                     fp.seek(0)
                     self.source = fp.read()

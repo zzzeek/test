@@ -64,6 +64,10 @@ def to_list(x, default=None):
     else:
         return x
 
+
+    
+
+
 class SetLikeDict(dict):
     """a dictionary that has some setlike methods on it"""
     def union(self, other):
@@ -158,13 +162,13 @@ _PYTHON_MAGIC_COMMENT_re = re.compile(
     re.VERBOSE)
 
 def parse_encoding(fp):
-    """Deduce the encoding of a source file from magic comment.
+    """Deduce the encoding of a Python source file (binary mode) from magic comment.
 
     It does this in the same way as the `Python interpreter`__
 
     .. __: http://docs.python.org/ref/encodings.html
 
-    The ``fp`` argument should be a seekable file object.
+    The ``fp`` argument should be a seekable file object in binary mode.
     """
     pos = fp.tell()
     fp.seek(0)
@@ -174,11 +178,11 @@ def parse_encoding(fp):
         if has_bom:
             line1 = line1[len(codecs.BOM_UTF8):]
 
-        m = _PYTHON_MAGIC_COMMENT_re.match(line1)
+        m = _PYTHON_MAGIC_COMMENT_re.match(line1.decode('ascii', 'ignore'))
         if not m:
             try:
                 import parser
-                parser.suite(line1)
+                parser.suite(line1.decode('ascii', 'ignore'))
             except (ImportError, SyntaxError):
                 # Either it's a real syntax error, in which case the source
                 # is not valid python source, or line2 is a continuation of
@@ -187,7 +191,7 @@ def parse_encoding(fp):
                 pass
             else:
                 line2 = fp.readline()
-                m = _PYTHON_MAGIC_COMMENT_re.match(line2)
+                m = _PYTHON_MAGIC_COMMENT_re.match(line2.decode('ascii', 'ignore'))
 
         if has_bom:
             if m:

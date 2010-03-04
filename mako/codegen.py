@@ -25,6 +25,14 @@ def compile(node,
     """Generate module source code given a parsetree node, 
       uri, and optional source filename"""
 
+    # if on Py2K, push the "source_encoding" string to be
+    # a bytestring itself, as we will be embedding it into 
+    # the generated source and we don't want to coerce the 
+    # result into a unicode object, in "disable_unicode" mode
+    if not util.py3k and isinstance(source_encoding, unicode):
+        source_encoding = source_encoding.encode(source_encoding)
+        
+        
     buf = util.FastEncodingBuffer()
 
     printer = PythonPrinter(buf)

@@ -474,7 +474,7 @@ class RichTracebackTest(TemplateTest):
                 filename = 'unicode_syntax_error.html'
             else:
                 filename = 'unicode_runtime_error.html'
-            source = file(self._file_path(filename)).read()
+            source = open(self._file_path(filename), 'rb').read()
             if not utf8:
                 source = source.decode('utf-8')
             templateargs = {'filename':self._file_path(filename)}

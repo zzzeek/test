@@ -545,8 +545,7 @@ text text la la
         )
 
     def test_crlf(self):
-        # hmmmm...py3k does something different with cr/lf ?
-        template = open(self._file_path("crlf.html")).read()
+        template = open(self._file_path("crlf.html"), 'rb').read()
         nodes = Lexer(template).parse()
         self._compare(
             nodes,
