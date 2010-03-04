@@ -368,14 +368,6 @@ class LexerTest(TemplateTest):
                 TemplateNode({}, [Code(u"print 'hi %>' \n", False, (1, 1))])
             )
         
-        template = r"""
-        <%
-            lines = src.split('\n')
-        %>
-"""
-        nodes = Lexer(template).parse()
-        # ????
-        
     def test_tricky_code_2(self):
         template = """<% 
         # someone's comment
@@ -387,7 +379,8 @@ class LexerTest(TemplateTest):
             TemplateNode({}, [Code(u" \n        # someone's comment\n        \n", False, (1, 1)), Text(u'\n        ', (3, 11))])
         )
 
-        if util.py3k:
+    if util.py3k:
+        def test_tricky_code_3(self):
             template= """<%
             print('hi')
             # this is a comment
@@ -403,7 +396,8 @@ class LexerTest(TemplateTest):
                 nodes,
                 TemplateNode({}, [Code(u"\nprint('hi')\n# this is a comment\n# another comment\nx = 7 # someone's '''comment\nprint('''\n        there\n        ''')\n# someone else's comment\n        \n", False, (1, 1)), Text(u" '''and now some text '''", (10, 11))])
             )
-        else:
+    else:
+        def test_tricky_code_3(self):
             template= """<%
             print 'hi'
             # this is a comment
