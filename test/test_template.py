@@ -3,7 +3,7 @@
 from mako.template import Template, ModuleTemplate
 from mako.lookup import TemplateLookup
 from mako.ext.preprocessors import convert_comments
-from mako import exceptions
+from mako import exceptions, util
 import re, os
 from util import flatten_result, result_lines
 import codecs
@@ -76,14 +76,14 @@ class EncodingTest(TemplateTest):
     def test_unicode_memory(self):
         val = u"""Alors vous imaginez ma surprise, au lever du jour, quand une drôle de petit voix m’a réveillé. Elle disait: « S’il vous plaît… dessine-moi un mouton! »"""
         self._do_memory_test(
-            "## -*- coding: utf-8 -*-\n" + val.encode('utf-8'),
+            ("## -*- coding: utf-8 -*-\n" + val).encode('utf-8'),
             u"""Alors vous imaginez ma surprise, au lever du jour, quand une drôle de petit voix m’a réveillé. Elle disait: « S’il vous plaît… dessine-moi un mouton! »"""
         )
     
     def test_unicode_text(self):
         val = u"""<%text>Alors vous imaginez ma surprise, au lever du jour, quand une drôle de petit voix m’a réveillé. Elle disait: « S’il vous plaît… dessine-moi un mouton! »</%text>"""
         self._do_memory_test(
-            "## -*- coding: utf-8 -*-\n" + val.encode('utf-8'),
+            ("## -*- coding: utf-8 -*-\n" + val).encode('utf-8'),
             u"""Alors vous imaginez ma surprise, au lever du jour, quand une drôle de petit voix m’a réveillé. Elle disait: « S’il vous plaît… dessine-moi un mouton! »"""
         )
 
@@ -96,7 +96,7 @@ class EncodingTest(TemplateTest):
         <%text>Alors vous imaginez ma surprise, au lever du jour, quand une drôle de petit voix m’a réveillé. Elle disait: « S’il vous plaît… dessine-moi un mouton! »</%text>
         </%call>"""
         self._do_memory_test(
-            "## -*- coding: utf-8 -*-\n" + val.encode('utf-8'),
+            ("## -*- coding: utf-8 -*-\n" + val).encode('utf-8'),
             u"""Alors vous imaginez ma surprise, au lever du jour, quand une drôle de petit voix m’a réveillé. Elle disait: « S’il vous plaît… dessine-moi un mouton! »""",
             filters=flatten_result
         )
@@ -155,7 +155,7 @@ class EncodingTest(TemplateTest):
         )
 
         self._do_memory_test(
-            file(self._file_path("unicode_arguments.html")).read(),
+            open(self._file_path("unicode_arguments.html"), 'rb').read(),
             [
                 u'x is: drôle de petit voix m’a réveillé',
                 u'x is: drôle de petit voix m’a réveillé',
@@ -166,28 +166,52 @@ class EncodingTest(TemplateTest):
         )
         
     def test_unicode_literal_in_def(self):
-        self._do_memory_test(
-            u"""## -*- coding: utf-8 -*-
-            <%def name="bello(foo, bar)">
-            Foo: ${ foo }
-            Bar: ${ bar }
-            </%def>
-            <%call expr="bello(foo=u'árvíztűrő tükörfúrógép', bar=u'ÁRVÍZTŰRŐ TÜKÖRFÚRÓGÉP')">
-            </%call>""".encode('utf-8'),
-            u"""Foo: árvíztűrő tükörfúrógép Bar: ÁRVÍZTŰRŐ TÜKÖRFÚRÓGÉP""",
-            filters=flatten_result
-        )
+        if util.py3k:
+            self._do_memory_test(
+                u"""## -*- coding: utf-8 -*-
+                <%def name="bello(foo, bar)">
+                Foo: ${ foo }
+                Bar: ${ bar }
+                </%def>
+                <%call expr="bello(foo='árvíztűrő tükörfúrógép', bar='ÁRVÍZTŰRŐ TÜKÖRFÚRÓGÉP')">
+                </%call>""".encode('utf-8'),
+                u"""Foo: árvíztűrő tükörfúrógép Bar: ÁRVÍZTŰRŐ TÜKÖRFÚRÓGÉP""",
+                filters=flatten_result
+            )
+
+            self._do_memory_test(
+                u"""## -*- coding: utf-8 -*-
+                <%def name="hello(foo='árvíztűrő tükörfúrógép', bar='ÁRVÍZTŰRŐ TÜKÖRFÚRÓGÉP')">
+                Foo: ${ foo }
+                Bar: ${ bar }
+                </%def>
+                ${ hello() }""".encode('utf-8'),
+                u"""Foo: árvíztűrő tükörfúrógép Bar: ÁRVÍZTŰRŐ TÜKÖRFÚRÓGÉP""",
+                filters=flatten_result
+            )
+        else:
+            self._do_memory_test(
+                u"""## -*- coding: utf-8 -*-
+                <%def name="bello(foo, bar)">
+                Foo: ${ foo }
+                Bar: ${ bar }
+                </%def>
+                <%call expr="bello(foo=u'árvíztűrő tükörfúrógép', bar=u'ÁRVÍZTŰRŐ TÜKÖRFÚRÓGÉP')">
+                </%call>""".encode('utf-8'),
+                u"""Foo: árvíztűrő tükörfúrógép Bar: ÁRVÍZTŰRŐ TÜKÖRFÚRÓGÉP""",
+                filters=flatten_result
+            )
         
-        self._do_memory_test(
-            u"""## -*- coding: utf-8 -*-
-            <%def name="hello(foo=u'árvíztűrő tükörfúrógép', bar=u'ÁRVÍZTŰRŐ TÜKÖRFÚRÓGÉP')">
-            Foo: ${ foo }
-            Bar: ${ bar }
-            </%def>
-            ${ hello() }""".encode('utf-8'),
-            u"""Foo: árvíztűrő tükörfúrógép Bar: ÁRVÍZTŰRŐ TÜKÖRFÚRÓGÉP""",
-            filters=flatten_result
-        )
+            self._do_memory_test(
+                u"""## -*- coding: utf-8 -*-
+                <%def name="hello(foo=u'árvíztűrő tükörfúrógép', bar=u'ÁRVÍZTŰRŐ TÜKÖRFÚRÓGÉP')">
+                Foo: ${ foo }
+                Bar: ${ bar }
+                </%def>
+                ${ hello() }""".encode('utf-8'),
+                u"""Foo: árvíztűrő tükörfúrógép Bar: ÁRVÍZTŰRŐ TÜKÖRFÚRÓGÉP""",
+                filters=flatten_result
+            )
         
     def test_input_encoding(self):
         """test the 'input_encoding' flag on Template, and that unicode 
@@ -243,7 +267,10 @@ class EncodingTest(TemplateTest):
     def test_read_unicode(self):
         lookup = TemplateLookup(directories=[template_base], 
                                 filesystem_checks=True, output_encoding='utf-8')
-        template = lookup.get_template('/read_unicode.html')
+        if util.py3k:
+            template = lookup.get_template('/read_unicode_py3k.html')
+        else:
+            template = lookup.get_template('/read_unicode.html')
         data = template.render(path=self._file_path('internationalization.html'))
 
     def test_bytestring_passthru(self):

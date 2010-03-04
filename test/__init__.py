@@ -15,6 +15,13 @@ class TemplateTest(unittest.TestCase):
         return Template(uri=filename, filename=filepath, module_directory=module_base, **kw)
     
     def _file_path(self, filename):
+        name, ext = os.path.splitext(filename)
+        
+        if py3k:
+            py3k_path = os.path.join(template_base, name + "_py3k" + ext)
+            if os.path.exists(py3k_path):
+                return py3k_path
+        
         return os.path.join(template_base, filename)
         
     def _do_file_test(self, filename, expected, filters=None, 
