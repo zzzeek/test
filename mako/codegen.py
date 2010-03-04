@@ -579,8 +579,9 @@ class _GenerateRenderMethod(object):
             if not self.in_def and len(self.identifiers.locally_assigned) > 0:
                 # if we are the "template" def, fudge locally declared/modified variables into the "__M_locals" dictionary,
                 # which is used for def calls within the same template, to simulate "enclosing scope"
-                self.printer.writeline('__M_locals.update(__M_dict_builtin([(__M_key, __M_locals_builtin()[__M_key]) for __M_key in [%s] if __M_key in __M_locals_builtin()]))' % ','.join([repr(x) for x in node.declared_identifiers()]))
-                
+                self.printer.writeline('__M_locals_builtin_stored = __M_locals_builtin()')
+                self.printer.writeline('__M_locals.update(__M_dict_builtin([(__M_key, __M_locals_builtin_stored[__M_key]) for __M_key in [%s] if __M_key in __M_locals_builtin_stored]))' % ','.join([repr(x) for x in node.declared_identifiers()]))
+
     def visitIncludeTag(self, node):
         self.write_source_comment(node)
         args = node.attributes.get('args')
