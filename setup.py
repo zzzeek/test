@@ -32,10 +32,11 @@ SVN version:
 
 """,
       classifiers=[
-      "Development Status :: 5 - Production/Stable",
+      'Development Status :: 5 - Production/Stable',
       'Environment :: Web Environment',
       'Intended Audience :: Developers',
       'Programming Language :: Python',
+      'Programming Language :: Python :: 3',
       'Topic :: Internet :: WWW/HTTP :: Dynamic Content',
       ],
       keywords='wsgi myghty mako',

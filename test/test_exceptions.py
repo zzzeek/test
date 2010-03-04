@@ -113,11 +113,9 @@ ${foobar}
         
         l = TemplateLookup(format_exceptions=True)
         if util.py3k:
-            l.put_string("foo.html", """# -*- coding: utf-8 -*-
-${'привет' + foobar}""")
+            l.put_string("foo.html", """# -*- coding: utf-8 -*-\n${'привет' + foobar}""")
         else:
-            l.put_string("foo.html", """# -*- coding: utf-8 -*-
-${u'привет' + foobar}""")
+            l.put_string("foo.html", """# -*- coding: utf-8 -*-\n${u'привет' + foobar}""")
 
         if util.py3k:
             assert u'<div class="sourceline">${\'привет\' + foobar}</div>'\
