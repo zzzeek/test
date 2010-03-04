@@ -92,6 +92,9 @@ class FastEncodingBuffer(object):
         self.unicode = unicode
         self.errors = errors
         self.write = self.data.append
+    
+    def truncate(self):
+        self.data =[]
         
     def getvalue(self):
         if self.encoding:
